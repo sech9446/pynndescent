@@ -49,7 +49,7 @@ point_indices_type = numba.int32[::1]
     },
     fastmath=True,
     nogil=True,
-    cache=True,
+    cache=False,
 )
 def angular_random_projection_split(data, indices, rng_state):
     """Given a set of ``graph_indices`` for graph_data points from ``graph_data``, create
@@ -170,7 +170,7 @@ def angular_random_projection_split(data, indices, rng_state):
     },
     fastmath=True,
     nogil=True,
-    cache=True,
+    cache=False,
 )
 def euclidean_random_projection_split(data, indices, rng_state):
     """Given a set of ``graph_indices`` for graph_data points from ``graph_data``, create
@@ -263,7 +263,7 @@ def euclidean_random_projection_split(data, indices, rng_state):
 @numba.njit(
     fastmath=True,
     nogil=True,
-    cache=True,
+    cache=False,
     locals={
         "normalized_left_data": numba.types.float32[::1],
         "normalized_right_data": numba.types.float32[::1],
@@ -386,7 +386,7 @@ def sparse_angular_random_projection_split(inds, indptr, data, indices, rng_stat
     return indices_left, indices_right, hyperplane, 0.0
 
 
-@numba.njit(fastmath=True, nogil=True, cache=True)
+@numba.njit(fastmath=True, nogil=True, cache=False)
 def sparse_euclidean_random_projection_split(inds, indptr, data, indices, rng_state):
     """Given a set of ``graph_indices`` for graph_data points from a sparse graph_data set
     presented in csr sparse format as inds, graph_indptr and graph_data, create
@@ -495,7 +495,7 @@ def sparse_euclidean_random_projection_split(inds, indptr, data, indices, rng_st
 
 @numba.njit(
     nogil=True,
-    cache=True,
+    cache=False,
     locals={"left_node_num": numba.types.int32, "right_node_num": numba.types.int32},
 )
 def make_euclidean_tree(
@@ -557,7 +557,7 @@ def make_euclidean_tree(
 
 @numba.njit(
     nogil=True,
-    cache=True,
+    cache=False,
     locals={
         "children": numba.types.ListType(children_type),
         "left_node_num": numba.types.int32,
@@ -623,7 +623,7 @@ def make_angular_tree(
 
 @numba.njit(
     nogil=True,
-    cache=True,
+    cache=False,
     locals={"left_node_num": numba.types.int32, "right_node_num": numba.types.int32},
 )
 def make_sparse_euclidean_tree(
@@ -693,7 +693,7 @@ def make_sparse_euclidean_tree(
 
 @numba.njit(
     nogil=True,
-    cache=True,
+    cache=False,
     locals={"left_node_num": numba.types.int32, "right_node_num": numba.types.int32},
 )
 def make_sparse_angular_tree(
@@ -759,7 +759,7 @@ def make_sparse_angular_tree(
         point_indices.append(indices)
 
 
-@numba.njit(nogil=True, cache=True)
+@numba.njit(nogil=True, cache=False)
 def make_dense_tree(data, rng_state, leaf_size=30, angular=False):
     indices = np.arange(data.shape[0]).astype(np.int32)
 
@@ -795,7 +795,7 @@ def make_dense_tree(data, rng_state, leaf_size=30, angular=False):
     return result
 
 
-@numba.njit(nogil=True, cache=True)
+@numba.njit(nogil=True, cache=False)
 def make_sparse_tree(inds, indptr, spdata, rng_state, leaf_size=30, angular=False):
     indices = np.arange(indptr.shape[0] - 1).astype(np.int32)
 
@@ -850,7 +850,7 @@ def make_sparse_tree(inds, indptr, spdata, rng_state, leaf_size=30, angular=Fals
         "dim": numba.types.intp,
         "d": numba.types.uint16,
     },
-    cache=True,
+    cache=False,
 )
 def select_side(hyperplane, offset, point, rng_state):
     margin = offset
@@ -883,7 +883,7 @@ def select_side(hyperplane, offset, point, rng_state):
         ),
     ],
     locals={"node": numba.types.uint32, "side": numba.types.boolean},
-    cache=True,
+    cache=False,
 )
 def search_flat_tree(point, hyperplanes, offsets, children, indices, rng_state):
     node = 0
@@ -897,7 +897,7 @@ def search_flat_tree(point, hyperplanes, offsets, children, indices, rng_state):
     return indices[-children[node, 0] : -children[node, 1]]
 
 
-@numba.njit(fastmath=True, cache=True)
+@numba.njit(fastmath=True, cache=False)
 def sparse_select_side(hyperplane, offset, point_inds, point_data, rng_state):
     margin = offset
 
@@ -922,7 +922,7 @@ def sparse_select_side(hyperplane, offset, point_inds, point_data, rng_state):
         return 1
 
 
-@numba.njit(locals={"node": numba.types.uint32}, cache=True)
+@numba.njit(locals={"node": numba.types.uint32}, cache=False)
 def search_sparse_flat_tree(
     point_inds, point_data, hyperplanes, offsets, children, indices, rng_state
 ):
@@ -1003,7 +1003,7 @@ def make_forest(
     return tuple(result)
 
 
-@numba.njit(nogil=True, cache=True)
+@numba.njit(nogil=True, cache=False)
 def get_leaves_from_tree(tree):
     n_leaves = 0
     for i in range(len(tree.children)):
@@ -1117,7 +1117,7 @@ def recursive_convert_sparse(
         return node_num, leaf_start
 
 
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def num_nodes_and_leaves(tree):
     n_nodes = 0
     n_leaves = 0
@@ -1131,7 +1131,7 @@ def num_nodes_and_leaves(tree):
     return n_nodes, n_leaves
 
 
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def dense_hyperplane_dim(hyperplanes):
     for i in range(len(hyperplanes)):
         if hyperplanes[i].shape[0] > 1:
@@ -1140,7 +1140,7 @@ def dense_hyperplane_dim(hyperplanes):
     raise ValueError("No hyperplanes of adequate size were found!")
 
 
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def sparse_hyperplane_dim(hyperplanes):
     max_dim = 0
     for i in range(len(hyperplanes)):
@@ -1219,7 +1219,7 @@ def renumbaify_tree(tree):
         "result": numba.float32,
         "i": numba.uint32,
     },
-    cache=True,
+    cache=False,
 )
 def score_tree(tree, neighbor_indices, data, rng_state):
     result = 0.0
@@ -1237,7 +1237,7 @@ def score_tree(tree, neighbor_indices, data, rng_state):
     return result / numba.float32(neighbor_indices.shape[0])
 
 
-@numba.njit(nogil=True, parallel=True, locals={"node": numba.int32}, cache=True)
+@numba.njit(nogil=True, parallel=True, locals={"node": numba.int32}, cache=False)
 def score_linked_tree(tree, neighbor_indices):
     result = 0.0
     n_nodes = len(tree.children)

@@ -20,14 +20,14 @@ FLOAT32_EPS = np.finfo(np.float32).eps
 FLOAT32_MAX = np.finfo(np.float32).max
 
 # Just reproduce a simpler version of numpy isclose (not numba supported yet)
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def isclose(a, b, rtol=1.0e-5, atol=1.0e-8):
     diff = np.abs(a - b)
     return diff <= (atol + rtol * np.abs(b))
 
 
 # Just reproduce a simpler version of numpy unique (not numba supported yet)
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def arr_unique(arr):
     aux = np.sort(arr)
     flag = np.concatenate((np.ones(1, dtype=np.bool_), aux[1:] != aux[:-1]))
@@ -35,7 +35,7 @@ def arr_unique(arr):
 
 
 # Just reproduce a simpler version of numpy union1d (not numba supported yet)
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def arr_union(ar1, ar2):
     if ar1.shape[0] == 0:
         return ar2
@@ -47,7 +47,7 @@ def arr_union(ar1, ar2):
 
 # Just reproduce a simpler version of numpy intersect1d (not numba supported
 # yet)
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def arr_intersect(ar1, ar2):
     aux = np.concatenate((ar1, ar2))
     aux.sort()
@@ -132,7 +132,7 @@ def fast_intersection_size(ar1, ar2):
         "j1": numba.types.int32,
         "j2": numba.types.int32,
     },
-    cache=True,
+    cache=False,
 )
 def sparse_sum(ind1, data1, ind2, data2):
     result_size = ind1.shape[0] + ind2.shape[0]
@@ -197,7 +197,7 @@ def sparse_sum(ind1, data1, ind2, data2):
     return result_ind, result_data
 
 
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def sparse_diff(ind1, data1, ind2, data2):
     return sparse_sum(ind1, data1, ind2, -data2)
 
@@ -224,7 +224,7 @@ def sparse_diff(ind1, data1, ind2, data2):
         "j1": numba.types.int32,
         "j2": numba.types.int32,
     },
-    cache=True,
+    cache=False,
 )
 def sparse_mul(ind1, data1, ind2, data2):
     result_ind = numba.typed.List.empty_list(numba.types.int32)
@@ -271,7 +271,7 @@ def sparse_mul(ind1, data1, ind2, data2):
         "j1": numba.types.int32,
         "j2": numba.types.int32,
     },
-    cache=True,
+    cache=False,
 )
 def sparse_dot_product(ind1, data1, ind2, data2):
     dim1 = ind1.shape[0]
@@ -657,7 +657,7 @@ def sparse_alternative_cosine(ind1, data1, ind2, data2):
         return np.log2(result)
 
 
-@numba.vectorize(fastmath=True, cache=True)
+@numba.vectorize(fastmath=True, cache=False)
 def sparse_correct_alternative_cosine(d):
     if isclose(0.0, abs(d), atol=1e-7) or d < 0.0:
         return 0.0
@@ -802,7 +802,7 @@ def sparse_alternative_hellinger(ind1, data1, ind2, data2):
         return np.log2(result)
 
 
-@numba.vectorize(fastmath=True, cache=True)
+@numba.vectorize(fastmath=True, cache=False)
 def sparse_correct_alternative_hellinger(d):
     if isclose(0.0, abs(d), atol=1e-7) or d < 0.0:
         return 0.0
@@ -938,7 +938,7 @@ def sparse_symmetric_kl_divergence(ind1, data1, ind2, data2):
     return symmetric_kl_divergence(dense_data1, dense_data2)
 
 
-@numba.njit(parallel=True, cache=True)
+@numba.njit(parallel=True, cache=False)
 def diversify(
     indices,
     distances,
@@ -993,7 +993,7 @@ def diversify(
     return indices, distances
 
 
-@numba.njit(parallel=True, cache=True)
+@numba.njit(parallel=True, cache=False)
 def diversify_csr(
     graph_indptr,
     graph_indices,

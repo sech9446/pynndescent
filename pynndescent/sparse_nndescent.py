@@ -24,7 +24,7 @@ locale.setlocale(locale.LC_NUMERIC, "C")
 EMPTY_GRAPH = make_heap(1, 1)
 
 
-@numba.njit(parallel=True, cache=True)
+@numba.njit(parallel=True, cache=False)
 def generate_leaf_updates(leaf_block, dist_thresholds, inds, indptr, data, dist):
 
     updates = [[(-1, -1, np.inf)] for i in range(leaf_block.shape[0])]
@@ -53,7 +53,7 @@ def generate_leaf_updates(leaf_block, dist_thresholds, inds, indptr, data, dist)
     return updates
 
 
-@numba.njit(locals={"d": numba.float32, "p": numba.int32, "q": numba.int32}, cache=True)
+@numba.njit(locals={"d": numba.float32, "p": numba.int32, "q": numba.int32}, cache=False)
 def init_rp_tree(inds, indptr, data, dist, current_graph, leaf_array):
 
     n_leaves = leaf_array.shape[0]
@@ -99,7 +99,7 @@ def init_rp_tree(inds, indptr, data, dist, current_graph, leaf_array):
 @numba.njit(
     fastmath=True,
     locals={"d": numba.float32, "i": numba.int32, "idx": numba.int32},
-    cache=True,
+    cache=False,
 )
 def init_random(n_neighbors, inds, indptr, data, heap, dist, rng_state):
     n_samples = indptr.shape[0] - 1
@@ -122,7 +122,7 @@ def init_random(n_neighbors, inds, indptr, data, heap, dist, rng_state):
     return
 
 
-@numba.njit(parallel=True, cache=True)
+@numba.njit(parallel=True, cache=False)
 def generate_graph_updates(
     new_candidate_block, old_candidate_block, dist_thresholds, inds, indptr, data, dist
 ):

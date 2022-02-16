@@ -10,13 +10,13 @@ import numba.experimental.structref as structref
 import numpy as np
 
 
-@numba.njit("void(i8[:], i8)", cache=True)
+@numba.njit("void(i8[:], i8)", cache=False)
 def seed(rng_state, seed):
     """Seed the random number generator with a given seed."""
     rng_state.fill(seed + 0xFFFF)
 
 
-@numba.njit("i4(i8[:])", cache=True)
+@numba.njit("i4(i8[:])", cache=False)
 def tau_rand_int(state):
     """A fast (pseudo)-random number generator.
 
@@ -42,7 +42,7 @@ def tau_rand_int(state):
     return state[0] ^ state[1] ^ state[2]
 
 
-@numba.njit("f4(i8[:])", cache=True)
+@numba.njit("f4(i8[:])", cache=False)
 def tau_rand(state):
     """A fast (pseudo)-random number generator for floats in the range [0,1]
 
@@ -72,7 +72,7 @@ def tau_rand(state):
         # "result": numba.types.float32, # This provides speed, but causes errors in corner cases
     },
     fastmath=True,
-    cache=True,
+    cache=False,
 )
 def norm(vec):
     """Compute the (standard l2) norm of a vector.
@@ -92,7 +92,7 @@ def norm(vec):
     return np.sqrt(result)
 
 
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def rejection_sample(n_samples, pool_size, rng_state):
     """Generate n_samples many integers from 0 to pool_size such that no
     integer is selected twice. The duplication constraint is achieved via
@@ -148,17 +148,17 @@ class Heap(structref.StructRefProxy):
         return Heap_get_flags(self)
 
 
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def Heap_get_flags(self):
     return self.flags
 
 
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def Heap_get_distances(self):
     return self.distances
 
 
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def Heap_get_indices(self):
     return self.indices
 
@@ -168,7 +168,7 @@ structref.define_proxy(Heap, HeapType, ["indices", "distances", "flags"])
 # Heap = namedtuple("Heap", ("indices", "distances", "flags"))
 
 
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def make_heap(n_points, size):
     """Constructor for the numba enabled heap objects. The heaps are used
     for approximate nearest neighbor search, maintaining a list of potential
@@ -199,7 +199,7 @@ def make_heap(n_points, size):
     return result
 
 
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def siftdown(heap1, heap2, elt):
     """Restore the heap property for a heap with an out of place element
     at position ``elt``. This works with a heap pair where heap1 carries
@@ -223,7 +223,7 @@ def siftdown(heap1, heap2, elt):
             elt = swap
 
 
-@numba.njit(parallel=True, cache=True)
+@numba.njit(parallel=True, cache=False)
 def deheap_sort(indices, distances):
     """Given two arrays representing a heap (indices and distances), reorder the 
      arrays by increasing distance. This is effectively just the second half of
@@ -294,7 +294,7 @@ def deheap_sort(indices, distances):
 #         return -1
 
 
-@numba.njit(parallel=True, locals={"idx": numba.types.int64}, cache=True)
+@numba.njit(parallel=True, locals={"idx": numba.types.int64}, cache=False)
 def new_build_candidates(current_graph, max_candidates, rng_state, n_threads):
     """Build a heap of candidate neighbors for nearest neighbor descent. For
     each vertex the candidate neighbors are any current neighbors, and any
@@ -384,14 +384,14 @@ def new_build_candidates(current_graph, max_candidates, rng_state, n_threads):
     return new_candidate_indices, old_candidate_indices
 
 
-@numba.njit("b1(u1[::1],i4)", cache=True)
+@numba.njit("b1(u1[::1],i4)", cache=False)
 def has_been_visited(table, candidate):
     loc = candidate >> 3
     mask = 1 << (candidate & 7)
     return table[loc] & mask
 
 
-@numba.njit("void(u1[::1],i4)", cache=True)
+@numba.njit("void(u1[::1],i4)", cache=False)
 def mark_visited(table, candidate):
     loc = candidate >> 3
     mask = 1 << (candidate & 7)
@@ -409,7 +409,7 @@ def mark_visited(table, candidate):
         "ic2": numba.types.uint16,
         "i_swap": numba.types.uint16,
     },
-    cache=True,
+    cache=False,
 )
 def simple_heap_push(priorities, indices, p, n):
     if p >= priorities[0]:
@@ -466,7 +466,7 @@ def simple_heap_push(priorities, indices, p, n):
         "ic2": numba.types.uint16,
         "i_swap": numba.types.uint16,
     },
-    cache=True,
+    cache=False,
 )
 def checked_heap_push(priorities, indices, p, n):
     if p >= priorities[0]:
@@ -528,7 +528,7 @@ def checked_heap_push(priorities, indices, p, n):
         "ic2": numba.types.uint16,
         "i_swap": numba.types.uint16,
     },
-    cache=True,
+    cache=False,
 )
 def checked_flagged_heap_push(priorities, indices, flags, p, n, f):
     if p >= priorities[0]:
@@ -594,7 +594,7 @@ def checked_flagged_heap_push(priorities, indices, flags, p, n, f):
         "i": numba.uint32,
         "j": numba.uint32,
     },
-    cache=True,
+    cache=False,
 )
 def apply_graph_updates_low_memory(current_graph, updates, n_threads):
 
@@ -627,7 +627,7 @@ def apply_graph_updates_low_memory(current_graph, updates, n_threads):
     return n_changes
 
 
-@numba.njit(locals={"p": numba.types.int64, "q": numba.types.int64}, cache=True)
+@numba.njit(locals={"p": numba.types.int64, "q": numba.types.int64}, cache=False)
 def apply_graph_updates_high_memory(current_graph, updates, in_graph):
 
     n_changes = 0
@@ -676,7 +676,7 @@ def apply_graph_updates_high_memory(current_graph, updates, in_graph):
     return n_changes
 
 
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def initalize_heap_from_graph_indices(heap, graph_indices, data, metric):
 
     for i in range(graph_indices.shape[0]):
@@ -689,7 +689,7 @@ def initalize_heap_from_graph_indices(heap, graph_indices, data, metric):
     return heap
 
 
-@numba.njit(parallel=True, cache=True)
+@numba.njit(parallel=True, cache=False)
 def sparse_initalize_heap_from_graph_indices(
     heap, graph_indices, data_indptr, data_indices, data_vals, metric
 ):

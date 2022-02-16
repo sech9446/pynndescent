@@ -63,7 +63,7 @@ def is_c_contiguous(array_like):
     return flags is not None and flags["C_CONTIGUOUS"]
 
 
-@numba.njit(parallel=True, cache=True)
+@numba.njit(parallel=True, cache=False)
 def generate_leaf_updates(leaf_block, dist_thresholds, data, dist):
 
     updates = [[(-1, -1, np.inf)] for i in range(leaf_block.shape[0])]
@@ -86,7 +86,7 @@ def generate_leaf_updates(leaf_block, dist_thresholds, data, dist):
     return updates
 
 
-@numba.njit(locals={"d": numba.float32, "p": numba.int32, "q": numba.int32}, cache=True)
+@numba.njit(locals={"d": numba.float32, "p": numba.int32, "q": numba.int32}, cache=False)
 def init_rp_tree(data, dist, current_graph, leaf_array):
 
     n_leaves = leaf_array.shape[0]
@@ -130,7 +130,7 @@ def init_rp_tree(data, dist, current_graph, leaf_array):
 @numba.njit(
     fastmath=True,
     locals={"d": numba.float32, "idx": numba.int32, "i": numba.int32},
-    cache=True,
+    cache=False,
 )
 def init_random(n_neighbors, data, heap, dist, rng_state):
     for i in range(data.shape[0]):
@@ -145,7 +145,7 @@ def init_random(n_neighbors, data, heap, dist, rng_state):
     return
 
 
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def init_from_neighbor_graph(heap, indices, distances):
     for p in range(indices.shape[0]):
         for k in range(indices.shape[1]):
@@ -156,7 +156,7 @@ def init_from_neighbor_graph(heap, indices, distances):
     return
 
 
-@numba.njit(parallel=True, cache=True)
+@numba.njit(parallel=True, cache=False)
 def generate_graph_updates(
     new_candidate_block, old_candidate_block, dist_thresholds, data, dist
 ):
@@ -192,7 +192,7 @@ def generate_graph_updates(
     return updates
 
 
-@numba.njit(cache=True)
+@numba.njit(cache=False)
 def process_candidates(
     data,
     dist,
