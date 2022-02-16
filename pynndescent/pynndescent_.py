@@ -63,7 +63,7 @@ def is_c_contiguous(array_like):
     return flags is not None and flags["C_CONTIGUOUS"]
 
 
-@numba.njit(parallel=True, cache=False)
+@numba.njit(parallel=False, cache=False)
 def generate_leaf_updates(leaf_block, dist_thresholds, data, dist):
 
     updates = [[(-1, -1, np.inf)] for i in range(leaf_block.shape[0])]
@@ -156,7 +156,7 @@ def init_from_neighbor_graph(heap, indices, distances):
     return
 
 
-@numba.njit(parallel=True, cache=False)
+@numba.njit(parallel=False, cache=False)
 def generate_graph_updates(
     new_candidate_block, old_candidate_block, dist_thresholds, data, dist
 ):
@@ -375,7 +375,7 @@ def nn_descent(
     return deheap_sort(current_graph[0], current_graph[1])
 
 
-@numba.njit(parallel=True)
+@numba.njit(parallel=False)
 def diversify(indices, distances, data, dist, rng_state, prune_probability=1.0):
 
     for i in numba.prange(indices.shape[0]):
@@ -412,7 +412,7 @@ def diversify(indices, distances, data, dist, rng_state, prune_probability=1.0):
     return indices, distances
 
 
-@numba.njit(parallel=True)
+@numba.njit(parallel=False)
 def diversify_csr(
     graph_indptr,
     graph_indices,
@@ -454,7 +454,7 @@ def diversify_csr(
     return
 
 
-@numba.njit(parallel=True)
+@numba.njit(parallel=False)
 def degree_prune_internal(indptr, data, max_degree=20):
     for i in numba.prange(indptr.shape[0] - 1):
         row_data = data[indptr[i] : indptr[i + 1]]
